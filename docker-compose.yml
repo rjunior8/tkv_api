@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+    tkv_api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: tkv_api_ctnr
+        image: "tkv_api_img:1.0"
+        env_file:
+            - .env
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        volumes:
+            - ./content:/etc/api:rw
+        restart: unless-stopped
+        depends_on:
+            - tkv_db
+    tkv_db:
+        image: mysql:8.0
+        container_name: tkv_db_ctnr
+        ports:
+            - "3307:3306"
+        env_file:
+            - .env
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        volumes:
+            - dbdata:/var/lib/mysql
+        restart: unless-stopped
+        cap_add:
+            - SYS_NICE
+    tkv_reverse_proxy:
+        container_name: tkv_reverse_proxy_ctnr
+        image: "tkv_reverse_proxy_img:1.0"
+        build:
+            context: ./reverse_proxy
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        ports:
+            - "9741:9123"
+        depends_on:
+            - tkv_api
+
+volumes:
+    dbdata:
