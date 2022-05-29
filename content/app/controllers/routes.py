@@ -1,5 +1,6 @@
 from fastapi import Depends
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 import time
@@ -20,7 +21,7 @@ async def swagger_ui_html():
     
     
 @app.post("/add-customer")
-async def add_customer(data: schemas.AddCustomersReq, db: Session = Depends(get_db)):
+async def add_customer(data: schemas.AddCustomerReq, db: Session = Depends(get_db)):
     
     new_customer = models.Customers()
     new_customer.name = data.name
@@ -31,6 +32,7 @@ async def add_customer(data: schemas.AddCustomersReq, db: Session = Depends(get_
     
     res = {
         "msg": "Customer created successfully!",
+        "id": new_customer.id
     }
     
     return JSONResponse(content=res, status_code=200)
@@ -58,22 +60,22 @@ async def add_acc(data: schemas.AddAccReq, db: Session = Depends(get_db)):
     return JSONResponse(content={"msg": "Customer NOT exists!"}, status_code=200)
 
 
-@app.post("/customer-info", response_model=schemas.CustomersInfoRes)
-async def customer_info(data: schemas.CustomersInfoReq, db: Session = Depends(get_db)):
+@app.post("/customer-info", response_model=schemas.CustomerInfoRes)
+async def customer_info(data: schemas.CustomerInfoReq, db: Session = Depends(get_db)):
     
     customer = db.query(models.Customers).filter(models.Customers.id == data.customer_id).first()
     
     if customer:
     
         transactions = db.query(
-            models.Accounts.transaction).filter(models.Accounts.owner == user.id).all()
+            models.Accounts.transaction).filter(models.Accounts.owner == customer.id).all()
         
         transactions = [i[0] for i in transactions if i[0] != 0]
         balance = sum(transactions)
         
-        return schemas.CustomersInfoRes(name=customer.name,
-                                        surname=customer.surname,
-                                        balance=balance,
-                                        transactions=transactions)
+        return schemas.CustomerInfoRes(name=customer.name,
+                                       surname=customer.surname,
+                                       balance=balance,
+                                       transactions=transactions)
         
     return JSONResponse(content={"msg": "Customer NOT exists!"}, status_code=200)

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List
 
 
-class AddCustomersReq(BaseModel):
+class AddCustomerReq(BaseModel):
     name: str
     surname: str
 
@@ -12,11 +12,11 @@ class AddAccReq(BaseModel):
     initial_credit: float
     
     
-class CustomersInfoReq(BaseModel):
+class CustomerInfoReq(BaseModel):
     customer_id: int
     
     
-class CustomersInfoRes(BaseModel):
+class CustomerInfoRes(BaseModel):
     name: str
     surname: str
     balance: float
