@@ -3,9 +3,6 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-import time
-from typing import List
-
 from app import app, get_db
 from app.models import models
 from app.schemas import schemas
